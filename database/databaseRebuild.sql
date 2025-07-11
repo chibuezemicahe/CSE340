@@ -46,4 +46,5 @@ INSERT INTO classification (classification_name) VALUES
 INSERT INTO inventory (inv_make, inv_model, inv_description, inv_image, inv_thumbnail, inv_price, inv_year, inv_miles, inv_color, classification_id)
 VALUES 
 ('Ford', 'F-150', 'A rugged truck with great towing capacity.', '/images/f150.jpg', '/images/f150-thumb.jpg', 35000.00, 2022, 10000, 'Black', 3),
-('Chevrolet', 'Camaro', 'A sporty car with sleek design.', '/images/camaro.jpg', '/images
+('Chevrolet', 'Camaro', 'A sporty car with sleek design.', '/images/camaro.jpg', '/images/camaro-thumb.jpg', 28000.00, 2023, 5000, 'Red', 1),
+('GM', 'Hummer', 'A beastly ride with small interiors.', '/images/hummer.jpg', '/images/hummer-thumb.jpg', 55000.00, 2021, 15000, 'Silver', 2);
