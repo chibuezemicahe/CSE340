@@ -132,4 +132,51 @@ Util.buildVehicleDetail = async function(vehicle){
   return detail;
 }
 
+/* ****************************************
+* Middleware For Handling Errors
+* Wrap other function in this for 
+* General Error Handling
+**************************************** */
+Util.handleErrors = fn => (req, res, next) => {
+  Promise.resolve(fn(req, res, next))
+    .catch(next)
+}
+
+/* ****************************************
+* Middleware to check token validity
+**************************************** */
+Util.checkJWTToken = (req, res, next) => {
+  if (req.cookies.jwt) {
+    jwt.verify(
+      req.cookies.jwt,
+      process.env.ACCESS_TOKEN_SECRET,
+      function (err, accountData) {
+        if (err) {
+          req.flash("Please log in")
+          res.clearCookie("jwt")
+          return res.redirect("/account/login")
+        }
+        res.locals.accountData = accountData
+        res.locals.loggedin = 1
+        next()
+      }
+    )
+  } else {
+    next()
+  }
+}
+
+/* ****************************************
+* Build the error view
+**************************************** */
+Util.buildErrorView = function(status, message) {
+  let errorView = '<div class="error-container">';
+  errorView += `<h1>Error ${status}</h1>`;
+  errorView += `<p>${message}</p>`;
+  errorView += '<p>Please try again or contact the administrator if the problem persists.</p>';
+  errorView += '<p><a href="/">Return to Home</a></p>';
+  errorView += '</div>';
+  return errorView;
+}
+
 module.exports = Util

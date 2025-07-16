@@ -341,3 +341,105 @@ footer p {
     padding-left: 2rem;
   }
 }
+
+/* Inventory Display Styles */
+#inv-display {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 0;
+  list-style-type: none;
+}
+
+#inv-display li {
+  flex: 1 1 100%;
+  max-width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 1rem;
+  background-color: #f9f9f9;
+  display: flex;
+  flex-direction: column;
+}
+
+#inv-display img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+#inv-display .namePrice {
+  margin-top: auto;
+  text-align: center;
+}
+
+#inv-display h2 {
+  font-size: 1.2rem;
+  margin: 0.5rem 0;
+}
+
+#inv-display span {
+  display: block;
+  font-weight: bold;
+  color: #0066cc;
+  font-size: 1.1rem;
+  margin-top: 0.5rem;
+}
+
+/* Media query for tablets */
+@media screen and (min-width: 600px) {
+  #inv-display li {
+    flex: 1 1 45%;
+    max-width: 45%;
+  }
+}
+
+/* Media query for desktops */
+@media screen and (min-width: 900px) {
+  #inv-display li {
+    flex: 1 1 30%;
+    max-width: 30%;
+  }
+}
+
+/* Error Styles */
+.error-container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #f8f8f8;
+  border-radius: 5px;
+  border-left: 5px solid #cc0000;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.error-container h1 {
+  color: #cc0000;
+  margin-top: 0;
+}
+
+.error-container a {
+  display: inline-block;
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background-color: #0066cc;
+  color: white;
+  border-radius: 3px;
+  text-decoration: none;
+}
+
+.error-container a:hover {
+  background-color: #004080;
+}
+
+/* Footer link styles */
+footer a {
+  color: white;
+  text-decoration: underline;
+  margin-top: 0.5rem;
+  display: inline-block;
+}
+
+footer a:hover {
+  color: #cccccc;
+}
