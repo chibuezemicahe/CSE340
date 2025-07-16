@@ -101,12 +101,12 @@ Util.buildVehicleDetail = async function(vehicle){
   // Create a responsive container for the image and details
   detail += '<div class="vehicle-container">';
   
-  // Add the full-size image
+  
   detail += '<div class="vehicle-image">';
   detail += `<img src="${vehicle.inv_image}" alt="Image of ${vehicle.inv_make} ${vehicle.inv_model}">`;
   detail += '</div>';
   
-  // Add the vehicle details
+
   detail += '<div class="vehicle-info">';
   
   // Make, model, and year (prominent)
