@@ -1,0 +1,84 @@
+<% if (title) { %>
+<h1><%= title %></h1>
+<% } else {
+  res.redirect('/')
+} %>
+
+<%- messages() %>
+
+<div class="form-container">
+  <h2>Add New Classification</h2>
+  <p><strong>Note:</strong> Classification names cannot contain spaces or special characters. Only letters and numbers are allowed.</p>
+  
+  <form id="addClassificationForm" action="/inv/add-classification" method="post">
+    <div class="form-group">
+      <label for="classification_name">Classification Name:</label>
+      <input 
+        type="text" 
+        id="classification_name" 
+        name="classification_name" 
+        required 
+        pattern="^[a-zA-Z0-9]+$"
+        title="Only letters and numbers are allowed, no spaces or special characters"
+        value="<%= locals.classification_name || '' %>"
+      >
+      <span class="error-message" id="nameError"></span>
+    </div>
+    
+    <div class="form-group">
+      <button type="submit" class="submit-btn">Add Classification</button>
+    </div>
+  </form>
+</div>
+
+<script>
+// Client-side validation
+document.getElementById('addClassificationForm').addEventListener('submit', function(e) {
+  const nameInput = document.getElementById('classification_name');
+  const nameError = document.getElementById('nameError');
+  const name = nameInput.value.trim();
+  
+  // Clear previous error
+  nameError.textContent = '';
+  nameInput.classList.remove('error');
+  
+  // Validate classification name
+  if (!name) {
+    e.preventDefault();
+    nameError.textContent = 'Classification name is required.';
+    nameInput.classList.add('error');
+    return;
+  }
+  
+  // Check for spaces and special characters
+  const validPattern = /^[a-zA-Z0-9]+$/;
+  if (!validPattern.test(name)) {
+    e.preventDefault();
+    nameError.textContent = 'Classification name can only contain letters and numbers (no spaces or special characters).';
+    nameInput.classList.add('error');
+    return;
+  }
+  
+  // Check minimum length
+  if (name.length < 2) {
+    e.preventDefault();
+    nameError.textContent = 'Classification name must be at least 2 characters long.';
+    nameInput.classList.add('error');
+    return;
+  }
+});
+
+// Real-time validation feedback
+document.getElementById('classification_name').addEventListener('input', function() {
+  const nameError = document.getElementById('nameError');
+  const name = this.value.trim();
+  
+  if (name && !/^[a-zA-Z0-9]+$/.test(name)) {
+    nameError.textContent = 'Only letters and numbers allowed.';
+    this.classList.add('error');
+  } else {
+    nameError.textContent = '';
+    this.classList.remove('error');
+  }
+});
+</script>
