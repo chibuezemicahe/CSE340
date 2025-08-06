@@ -10,7 +10,9 @@ const pool = require('./database/')
 const static = require("./routes/static")
 const baseController = require("./controllers/baseController")
 const inventoryRoute = require("./routes/inventoryRoute")
+const accountRoute = require("./routes/accountRoute")
 const utilities = require("./utilities/")
+const cookieParser = require("cookie-parser")
 
 /* ***********************
  * Middleware
@@ -33,9 +35,15 @@ app.use(function(req, res, next){
   next()
 })
 
+// Cookie parser middleware
+app.use(cookieParser())
+
 // Body parsing middleware
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
+
+// JWT Token checking middleware
+app.use(utilities.checkJWTToken)
 
 /* ***********************
  * View Engine and Templates
@@ -57,6 +65,9 @@ app.get("/trigger-error", utilities.handleErrors(baseController.triggerError))
 
 // Inventory routes
 app.use("/inv", inventoryRoute)
+
+// Account routes
+app.use("/account", accountRoute)
 
 /* ***********************
  * Express Error Handler

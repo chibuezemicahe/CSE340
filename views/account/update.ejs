@@ -1,0 +1,324 @@
+<% if (title) { %>
+<h1><%= title %></h1>
+<% } else {
+  res.redirect('/')
+} %>
+
+<%# Display flash messages %>
+<%- messages() %>
+
+<%# Display errors if any %>
+<% if (errors) { %>
+  <div class="error-messages">
+    <ul>
+      <% errors.array().forEach(error => { %>
+        <li><%= error.msg %></li>
+      <% }) %>
+    </ul>
+  </div>
+<% } %>
+
+<div class="update-account-container">
+  <!-- Account Information Update Form -->
+  <section class="account-update-section">
+    <h2>Account Update</h2>
+    <form id="updateAccountForm" action="/account/update" method="post">
+      <fieldset>
+        <legend>Update Account Information</legend>
+        
+        <label for="account_firstname">First Name:</label>
+        <input type="text" id="account_firstname" name="account_firstname" 
+               value="<%= locals.account_firstname || (locals.accountData ? locals.accountData.account_firstname : '') %>" 
+               required minlength="1" maxlength="255">
+        
+        <label for="account_lastname">Last Name:</label>
+        <input type="text" id="account_lastname" name="account_lastname" 
+               value="<%= locals.account_lastname || (locals.accountData ? locals.accountData.account_lastname : '') %>" 
+               required minlength="1" maxlength="255">
+        
+        <label for="account_email">Email Address:</label>
+        <input type="email" id="account_email" name="account_email" 
+               value="<%= locals.account_email || (locals.accountData ? locals.accountData.account_email : '') %>" 
+               required maxlength="255">
+        
+        <!-- Hidden field for account ID -->
+        <input type="hidden" name="account_id" value="<%= account_id || (locals.accountData ? locals.accountData.account_id : '') %>">
+        
+        <input type="submit" value="Update Account" class="btn btn-primary">
+      </fieldset>
+    </form>
+  </section>
+
+  <!-- Password Change Form -->
+  <section class="password-change-section">
+    <h2>Change Password</h2>
+    <div class="password-requirements">
+      <p><strong>Password Requirements:</strong></p>
+      <ul>
+        <li>Must be at least 12 characters long</li>
+        <li>Must contain at least 1 uppercase letter</li>
+        <li>Must contain at least 1 lowercase letter</li>
+        <li>Must contain at least 1 number</li>
+        <li>Must contain at least 1 special character (@$!%*?&)</li>
+      </ul>
+      <p><em>Note: Entering a new password will replace your current password.</em></p>
+    </div>
+    
+    <form id="changePasswordForm" action="/account/change-password" method="post">
+      <fieldset>
+        <legend>Change Your Password</legend>
+        
+        <label for="account_password">New Password:</label>
+        <input type="password" id="account_password" name="account_password" 
+               required minlength="12" 
+               pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,}$"
+               title="Password must be at least 12 characters and contain at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character">
+        
+        <label for="confirm_password">Confirm New Password:</label>
+        <input type="password" id="confirm_password" name="confirm_password" 
+               required minlength="12"
+               title="Please confirm your new password">
+        
+        <!-- Hidden field for account ID -->
+        <input type="hidden" name="account_id" value="<%= account_id || (locals.accountData ? locals.accountData.account_id : '') %>">
+        
+        <input type="submit" value="Change Password" class="btn btn-secondary">
+      </fieldset>
+    </form>
+  </section>
+
+  <div class="navigation-links">
+    <p><a href="/account/" class="btn btn-link">Back to Account Management</a></p>
+  </div>
+</div>
+
+<script>
+// Client-side validation for all forms
+document.getElementById('updateAccountForm').addEventListener('submit', function(e) {
+  const firstName = document.getElementById('account_firstname').value.trim();
+  const lastName = document.getElementById('account_lastname').value.trim();
+  const email = document.getElementById('account_email').value.trim();
+  
+  if (!firstName || !lastName || !email) {
+    e.preventDefault();
+    alert('All fields are required.');
+    return false;
+  }
+  
+  // Email validation
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailPattern.test(email)) {
+    e.preventDefault();
+    alert('Please enter a valid email address.');
+    return false;
+  }
+});
+
+// Client-side validation for password confirmation
+document.getElementById('changePasswordForm').addEventListener('submit', function(e) {
+  const newPassword = document.getElementById('account_password').value;
+  const confirmPassword = document.getElementById('confirm_password').value;
+  
+  if (newPassword !== confirmPassword) {
+    e.preventDefault();
+    alert('New password and confirmation password do not match.');
+    return false;
+  }
+  
+  // Password pattern validation
+  const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,}$/;
+  if (!passwordPattern.test(newPassword)) {
+    e.preventDefault();
+    alert('Password must meet all requirements.');
+    return false;
+  }
+});
+
+// Real-time password validation feedback
+document.getElementById('account_password').addEventListener('input', function(e) {
+  const password = e.target.value;
+  const pattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,}$/;
+  
+  if (password.length > 0) {
+    if (pattern.test(password)) {
+      e.target.setCustomValidity('');
+      e.target.style.borderColor = 'green';
+    } else {
+      e.target.setCustomValidity('Password must meet requirements');
+      e.target.style.borderColor = 'red';
+    }
+  } else {
+    e.target.style.borderColor = '';
+  }
+});
+
+// Real-time confirmation validation
+document.getElementById('confirm_password').addEventListener('input', function(e) {
+  const newPassword = document.getElementById('account_password').value;
+  const confirmPassword = e.target.value;
+  
+  if (confirmPassword.length > 0) {
+    if (newPassword === confirmPassword) {
+      e.target.setCustomValidity('');
+      e.target.style.borderColor = 'green';
+    } else {
+      e.target.setCustomValidity('Passwords do not match');
+      e.target.style.borderColor = 'red';
+    }
+  } else {
+    e.target.style.borderColor = '';
+  }
+});
+</script>
+
+<style>
+/* Form styling for better user experience */
+.update-account-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.account-update-section,
+.password-change-section {
+  margin-bottom: 40px;
+  background: #f9f9f9;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+.account-update-section h2,
+.password-change-section h2 {
+  color: #333;
+  margin-bottom: 15px;
+  border-bottom: 2px solid #007bff;
+  padding-bottom: 5px;
+}
+
+fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+legend {
+  font-weight: bold;
+  margin-bottom: 15px;
+  color: #555;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #333;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+  transition: border-color 0.3s ease;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+}
+
+input[type="text"]:invalid,
+input[type="email"]:invalid,
+input[type="password"]:invalid {
+  border-color: #dc3545;
+}
+
+input[type="text"]:valid,
+input[type="email"]:valid,
+input[type="password"]:valid {
+  border-color: #28a745;
+}
+
+.btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+  transition: background-color 0.3s ease;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: #545b62;
+}
+
+.btn-link {
+  background-color: transparent;
+  color: #007bff;
+  border: 1px solid #007bff;
+}
+
+.btn-link:hover {
+  background-color: #007bff;
+  color: white;
+}
+
+.navigation-links {
+  text-align: center;
+  margin-top: 30px;
+}
+
+.error-messages {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 15px;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.error-messages ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.error-messages li {
+  margin-bottom: 5px;
+}
+
+@media (max-width: 768px) {
+  .update-account-container {
+    padding: 10px;
+  }
+  
+  .account-update-section,
+  .password-change-section {
+    padding: 15px;
+  }
+}
+</style>

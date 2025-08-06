@@ -1,4 +1,6 @@
 const invModel = require("../models/inventory-model")
+const jwt = require("jsonwebtoken")
+require("dotenv").config()
 const Util = {}
 
 /* ************************
@@ -133,6 +135,39 @@ Util.checkJWTToken = (req, res, next) => {
 }
 
 /* ****************************************
+* Middleware to check account type for admin access
+* Only allows Employee and Admin account types
+**************************************** */
+Util.checkAccountType = (req, res, next) => {
+  if (req.cookies.jwt) {
+    jwt.verify(
+      req.cookies.jwt,
+      process.env.ACCESS_TOKEN_SECRET,
+      function (err, accountData) {
+        if (err) {
+          req.flash("notice", "Please log in to access this resource.")
+          res.clearCookie("jwt")
+          return res.redirect("/account/login")
+        }
+        
+        // Check if account type is Employee or Admin
+        if (accountData.account_type === 'Employee' || accountData.account_type === 'Admin') {
+          res.locals.accountData = accountData
+          res.locals.loggedin = 1
+          next()
+        } else {
+          req.flash("notice", "You do not have permission to access this resource.")
+          return res.redirect("/account/login")
+        }
+      }
+    )
+  } else {
+    req.flash("notice", "Please log in to access this resource.")
+    return res.redirect("/account/login")
+  }
+}
+
+/* ****************************************
 * Build the error view
 **************************************** */
 Util.buildErrorView = function(status, message) {
@@ -165,6 +200,18 @@ Util.buildClassificationList = async function (classification_id = null) {
   })
   classificationList += "</select>"
   return classificationList
+}
+
+/* ****************************************
+*  Check Login
+* ************************************ */
+Util.checkLogin = (req, res, next) => {
+  if (res.locals.loggedin) {
+    next()
+  } else {
+    req.flash("notice", "Please log in.")
+    return res.redirect("/account/login")
+  }
 }
 
 module.exports = Util
