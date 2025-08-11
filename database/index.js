@@ -8,9 +8,12 @@ require("dotenv").config()
  * *************** */
 let pool
 if (process.env.NODE_ENV == "development") {
+  // Check if it's a local database (no SSL needed)
+  const isLocal = process.env.DATABASE_URL.includes('localhost')
+  
   pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: {
+    ssl: isLocal ? false : {
       rejectUnauthorized: false,
     },
   })
