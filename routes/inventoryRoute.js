@@ -40,4 +40,23 @@ router.post(
 // Route to get inventory items by classification as JSON - REQUIRES ADMIN ACCESS
 router.get("/getInventory/:classification_id", utilities.handleErrors(invController.getInventoryJSON))
 
+// Add these routes to the existing inventoryRoute.js file
+
+const reviewValidate = require("../utilities/review-validation")
+
+// Route to build add review form - REQUIRES LOGIN
+router.get("/add-review/:invId", utilities.checkLogin, utilities.handleErrors(invController.buildAddReview))
+
+// Route to process add review - REQUIRES LOGIN
+router.post(
+  "/add-review",
+  utilities.checkLogin,
+  reviewValidate.reviewRules(),
+  reviewValidate.checkReviewData,
+  utilities.handleErrors(invController.addReview)
+)
+
+// Route to mark review as helpful - REQUIRES LOGIN
+router.get("/review/:reviewId/helpful/:invId", utilities.checkLogin, utilities.handleErrors(invController.markReviewHelpful))
+
 module.exports = router

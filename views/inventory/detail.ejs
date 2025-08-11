@@ -4,6 +4,9 @@
   res.redirect('/')
 } %>
 
-<%# messages() %>
+<%- messages() %>
 
 <%- detailView %>
+
+<!-- Add Reviews Section -->
+<%- include('../partials/reviews', { reviews: reviews, averageRating: averageRating, inventory: inventory }) %>

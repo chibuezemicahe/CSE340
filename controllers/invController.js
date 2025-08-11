@@ -92,12 +92,17 @@ invCont.buildByClassificationId = async function (req, res, next) {
 }
 
 /* ***************************
- *  Build inventory detail view
+ *  Build inventory detail view (UPDATED)
  * ************************** */
 invCont.buildByInventoryId = async function (req, res, next) {
   const inventory_id = req.params.invId
   const data = await invModel.getInventoryByInventoryId(inventory_id)
   const detailView = await utilities.buildVehicleDetail(data)
+  
+  // Get reviews and average rating
+  const reviews = await reviewModel.getReviewsByInventoryId(inventory_id)
+  const averageRating = await reviewModel.getAverageRating(inventory_id)
+  
   let nav = await utilities.getNav()
   const make = data.inv_make
   const model = data.inv_model
@@ -105,6 +110,9 @@ invCont.buildByInventoryId = async function (req, res, next) {
     title: make + " " + model,
     nav,
     detailView,
+    reviews,
+    averageRating,
+    inventory: data,
   })
 }
 
@@ -166,6 +174,87 @@ invCont.getInventoryJSON = async (req, res, next) => {
   } else {
     next(new Error("No data returned"))
   }
+}
+
+// Add these functions to the existing invController.js file
+
+const reviewModel = require("../models/review-model")
+
+/* ***************************
+ *  Build add review form
+ * ************************** */
+invCont.buildAddReview = async function (req, res, next) {
+  const inv_id = req.params.invId
+  const inventory = await invModel.getInventoryByInventoryId(inv_id)
+  let nav = await utilities.getNav()
+  
+  // Check if user already reviewed this vehicle
+  if (res.locals.loggedin) {
+    const existingReview = await reviewModel.checkExistingReview(res.locals.accountData.account_id, inv_id)
+    if (existingReview) {
+      req.flash("notice", "You have already reviewed this vehicle.")
+      return res.redirect(`/inv/detail/${inv_id}`)
+    }
+  }
+  
+  res.render("./inventory/add-review", {
+    title: `Review ${inventory.inv_make} ${inventory.inv_model}`,
+    nav,
+    inventory,
+    errors: null,
+  })
+}
+
+/* ***************************
+ *  Process add review
+ * ************************** */
+invCont.addReview = async function (req, res) {
+  let nav = await utilities.getNav()
+  const { inv_id, review_rating, review_text } = req.body
+  const account_id = res.locals.accountData.account_id
+  
+  // Check if user already reviewed this vehicle
+  const existingReview = await reviewModel.checkExistingReview(account_id, inv_id)
+  if (existingReview) {
+    req.flash("notice", "You have already reviewed this vehicle.")
+    return res.redirect(`/inv/detail/${inv_id}`)
+  }
+  
+  const reviewResult = await reviewModel.addReview(account_id, inv_id, review_rating, review_text)
+  
+  if (reviewResult && !reviewResult.message) {
+    req.flash("notice", "Thank you for your review!")
+    res.redirect(`/inv/detail/${inv_id}`)
+  } else {
+    req.flash("notice", "Sorry, adding the review failed.")
+    const inventory = await invModel.getInventoryByInventoryId(inv_id)
+    res.status(501).render("inventory/add-review", {
+      title: `Review ${inventory.inv_make} ${inventory.inv_model}`,
+      nav,
+      inventory,
+      errors: null,
+      review_rating,
+      review_text
+    })
+  }
+}
+
+/* ***************************
+ *  Mark review as helpful
+ * ************************** */
+invCont.markReviewHelpful = async function (req, res) {
+  const review_id = req.params.reviewId
+  const inv_id = req.params.invId
+  
+  const result = await reviewModel.updateReviewHelpfulness(review_id)
+  
+  if (result && !result.message) {
+    req.flash("notice", "Thank you for your feedback!")
+  } else {
+    req.flash("notice", "Sorry, there was an error processing your request.")
+  }
+  
+  res.redirect(`/inv/detail/${inv_id}`)
 }
 
 module.exports = invCont

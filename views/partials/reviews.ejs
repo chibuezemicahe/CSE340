@@ -1,0 +1,61 @@
+<div class="reviews-section">
+  <div class="reviews-header">
+    <h3>Customer Reviews</h3>
+    <% if (averageRating && averageRating.review_count > 0) { %>
+      <div class="rating-summary">
+        <div class="stars">
+          <% for (let i = 1; i <= 5; i++) { %>
+            <span class="star <%= i <= Math.round(averageRating.avg_rating) ? 'filled' : '' %>">★</span>
+          <% } %>
+        </div>
+        <span class="rating-text"><%= parseFloat(averageRating.avg_rating).toFixed(1) %> out of 5 (<%= averageRating.review_count %> reviews)</span>
+      </div>
+    <% } else { %>
+      <p class="no-reviews">No reviews yet. Be the first to review this vehicle!</p>
+    <% } %>
+  </div>
+  
+  <% if (locals.loggedin) { %>
+    <div class="add-review-link">
+      <a href="/inv/add-review/<%= inventory.inv_id %>" class="btn btn-primary">Write a Review</a>
+    </div>
+  <% } else { %>
+    <div class="login-prompt">
+      <p><a href="/account/login">Login</a> to write a review</p>
+    </div>
+  <% } %>
+  
+  <% if (reviews && reviews.length > 0) { %>
+    <div class="reviews-list">
+      <% reviews.forEach(review => { %>
+        <div class="review-item">
+          <div class="review-header">
+            <div class="reviewer-info">
+              <strong><%= review.first_name %> <%= review.last_name.charAt(0) %>.</strong>
+              <div class="review-stars">
+                <% for (let i = 1; i <= 5; i++) { %>
+                  <span class="star <%= i <= review.review_rating ? 'filled' : '' %>">★</span>
+                <% } %>
+              </div>
+            </div>
+            <div class="review-date">
+              <%= new Date(review.review_date).toLocaleDateString() %>
+            </div>
+          </div>
+          <div class="review-content">
+            <p><%= review.review_text %></p>
+          </div>
+          <div class="review-actions">
+            <% if (locals.loggedin) { %>
+              <a href="/inv/review/<%= review.review_id %>/helpful/<%= inventory.inv_id %>" class="helpful-link">
+                👍 Helpful (<%= review.helpful_count %>)
+              </a>
+            <% } else { %>
+              <span class="helpful-count">👍 Helpful (<%= review.helpful_count %>)</span>
+            <% } %>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  <% } %>
+</div>
